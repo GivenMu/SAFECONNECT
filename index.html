@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SafeConnect — Community Safety Alert App</title>
+  <meta name="description" content="SafeConnect: Community safety alerts, incident map, reports with images, and emergency contacts." />
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Leaflet (Map) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">
+        <div class="logo">🛡️</div>
+        <div>
+          <div class="brand-title">SafeConnect</div>
+          <div class="brand-sub">Community Safety Alert App</div>
+        </div>
+      </div>
+
+      <button class="btn small" id="toggleThemeBtn" type="button" aria-label="Toggle theme">🌓</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="hero-left">
+        <h1>Instant safety alerts. Live incident map. Community awareness.</h1>
+        <p class="muted">
+          A working prototype website for school: panic alerts with location, reports with pictures,
+          and emergency contacts.
+        </p>
+        <div class="creator">
+          Creator: <strong>Murunwa Mutshotsho</strong>
+        </div>
+
+        <div class="hero-actions">
+          <button class="btn danger" id="panicBtn" type="button">🚨 PANIC BUTTON</button>
+          <button class="btn" id="getLocationBtn" type="button">📍 Get My Location</button>
+          <button class="btn ghost" id="shareAppBtn" type="button">🔗 Share App</button>
+        </div>
+
+        <div class="status" id="statusBox" role="status" aria-live="polite">
+          <div><strong>Status:</strong> Ready</div>
+          <div class="muted" id="statusSub">Tip: allow location permission for full demo.</div>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="card">
+          <div class="card-title">Your Current Location</div>
+          <div class="kv">
+            <div class="k">Latitude</div><div class="v" id="lat">—</div>
+            <div class="k">Longitude</div><div class="v" id="lng">—</div>
+            <div class="k">Accuracy</div><div class="v" id="acc">—</div>
+          </div>
+          <div class="row gap">
+            <a class="btn small" id="openInMapsBtn" href="#" target="_blank" rel="noopener">🗺️ Open in Maps</a>
+            <button class="btn small ghost" id="copyCoordsBtn" type="button">📋 Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Emergency Contacts (South Africa)</div>
+          <div class="contacts">
+            <a class="contact" href="tel:10111">📞 Police: 10111</a>
+            <a class="contact" href="tel:10177">🚑 Ambulance: 10177</a>
+            <a class="contact" href="tel:112">📱 Cell Emergency: 112</a>
+          </div>
+          <div class="muted tiny">
+            If you’re demonstrating at school, explain: “One-tap call links are built into the website.”
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <section class="card">
+        <div class="card-title">📍 Live Incident Map</div>
+        <div class="muted">
+          Incidents appear here as pins. Add reports or panic alerts to see it update immediately.
+        </div>
+        <div id="map" class="map" aria-label="Incident map"></div>
+
+        <div class="row gap mt">
+          <button class="btn small" id="centerMeBtn" type="button">🎯 Center on Me</button>
+          <button class="btn small ghost" id="clearAllBtn" type="button">🗑️ Clear All Data</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-title">📝 Report Suspicious Activity</div>
+
+        <form id="reportForm" class="form">
+          <label>
+            Type of incident
+            <select id="incidentType" required>
+              <option value="">Select…</option>
+              <option>Suspicious Activity</option>
+              <option>House Break-in</option>
+              <option>Robbery/Crime</option>
+              <option>GBV Concern</option>
+              <option>Other</option>
+            </select>
+          </label>
+
+          <label>
+            Short description
+            <input id="incidentDesc" type="text" placeholder="e.g. Unknown person checking gates" maxlength="120" required />
+          </label>
+
+          <label>
+            Optional: Add a picture
+            <input id="incidentImage" type="file" accept="image/*" />
+          </label>
+
+          <div class="row gap">
+            <button class="btn" type="submit">➕ Submit Report</button>
+            <button class="btn ghost" id="fillDemoBtn" type="button">✨ Fill Demo</button>
+          </div>
+
+          <div class="muted tiny">
+            Reports are saved in your browser (local database) so they stay after refresh.
+          </div>
+        </form>
+      </section>
+    </section>
+
+    <section class="card">
+      <div class="card-title">🧾 Recent Alerts & Reports</div>
+      <div class="muted">This list updates instantly (like a feed).</div>
+
+      <div class="row gap mt">
+        <input id="searchInput" class="search" type="text" placeholder="Search reports (type, description)..." />
+        <select id="filterSelect" class="search">
+          <option value="ALL">All</option>
+          <option value="PANIC">Panic Alerts</option>
+          <option value="REPORT">Reports</option>
+        </select>
+      </div>
+
+      <div id="feed" class="feed" aria-live="polite"></div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">Project Info (for School)</div>
+      <div class="info-grid">
+        <div class="info">
+          <div class="info-h">🧠 Background</div>
+          <div class="muted">
+            Communities face crime, GBV, break-ins, and delayed emergency response. People often don’t know what’s happening until it’s too late.
+          </div>
+        </div>
+        <div class="info">
+          <div class="info-h">🎯 Aim</div>
+          <div class="muted">
+            Build a system to send instant safety alerts + share emergency info to improve response time and awareness.
+          </div>
+        </div>
+        <div class="info">
+          <div class="info-h">❓ Hypothesis</div>
+          <div class="muted">
+            If community members can instantly share alerts, response time and awareness will improve.
+          </div>
+        </div>
+        <div class="info">
+          <div class="info-h">🔬 Technology</div>
+          <div class="muted">
+            GPS, mobile data transmission, database storage, and data analysis for hotspots.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div>© <span id="year"></span> SafeConnect</div>
+      <div>Creator: <strong>Murunwa Mutshotsho</strong></div>
+    </footer>
+  </main>
+
+  <!-- Leaflet (Map) -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <script src="app.js"></script>
+</body>
+</html>
